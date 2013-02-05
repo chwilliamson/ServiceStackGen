@@ -8,33 +8,49 @@ namespace ServiceStackGen.Tests
     [TestFixture]
     public class ServiceStackWrapperGeneratorFixture
     {
-        /// <summary>
-        /// Generate a class only
-        /// </summary>
         [Test]
-        public void ClassOnly()
+        [TestCase(
+            typeof(Examples.ClassWithOneMethod), 
+            typeof(Examples.ClassWithOneMethodExpected),
+            TestName = "ClassWithOneMethodExpected")]
+        [TestCase(
+            typeof(Examples.ClassOnly), 
+            typeof(Examples.ClassOnlyExpected),
+            TestName = "ClassOnly")]
+        [TestCase(
+            typeof(Examples.ClassWithAVoidMethodAndParameters), 
+            typeof(Examples.ClassWithAVoidMethodAndParametersExpected),
+            TestName = "ClassWithAVoidMethodAndParameters")]
+        [TestCase(
+            typeof(Examples.ClassWithOneMethodAndParameterAndReturn), 
+            typeof(Examples.ClassWithOneMethodAndParameterAndReturnExpected),
+            TestName = "ClassWithOneMethodAndParameterAndReturn")]
+        [TestCase(
+            typeof(Examples.ClassAndVariousMethods), 
+            typeof(Examples.ClassAndVariousMethodsExpected),
+            TestName = "ClassAndVariousMethods")]
+        public void TypeExpectations(Type source, Type expected)
         {
             var gen = new ServiceStackWrapperGenerator();
-            var result = gen.Generate(typeof(Examples.ClassOnly));
+            var result = gen.Generate(source);
 
-            AssertIs(result,typeof(Examples.ClassOnlyExpected));
-            
+            AssertResultEqual(result, expected);
         }
 
-        /// <summary>
-        /// Generate a class only
-        /// </summary>
         [Test]
-        public void GenerateVoidMethodHasClassRepresentingInput()
+        public void ClassAndVariousMethodsMethodOmitted()
         {
             var gen = new ServiceStackWrapperGenerator();
-            var result = gen.Generate(typeof(Examples.MyServiceWithOneMethod));
-
-            AssertIs(result, typeof(Examples.MyServiceWithOneMethodExpected));
-
+            var result = gen.Generate(new GenerationOptions
+                {
+                  Target  = typeof(Examples.ClassWith2Methods),
+                  TypeName = typeof(Examples.ClassWith2MethodsExpectedOmittingBarFoo).Name,
+                  MethodNameRegex = "FooBar"
+                });
+            AssertResultEqual(result, typeof(Examples.ClassWith2MethodsExpectedOmittingBarFoo));
         }
 
-        private void AssertIs(string result,Type expected)
+        private void AssertResultEqual(string result,Type expected)
         {
             using (var s = File.OpenRead(
                 Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Examples", expected.Name + ".cs")))

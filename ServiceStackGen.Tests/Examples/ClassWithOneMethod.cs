@@ -1,6 +1,6 @@
 ﻿namespace ServiceStackGen.Tests.Examples
 {
-    public class MyServiceWithOneMethod
+    public class ClassWithOneMethod
     {
         public void DoSomething()
         {
