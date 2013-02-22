@@ -15,6 +15,7 @@
 *.orig
 /lib
 nuget.exe
+.nuget/
 
 #resharper#
 _ReSharper.*
