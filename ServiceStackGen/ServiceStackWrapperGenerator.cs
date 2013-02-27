@@ -17,32 +17,64 @@ namespace ServiceStackGen
     {
         public string Generate(Type type)
         {
-            return Generate(new GenerationOptions {Target = type, TypeName = type.Name + "Expected"});
+            return Generate(new GenerationOptions(type));
         }
 
-        public string Generate(GenerationOptions generationOptions)
+        public Assembly GenerateAssembly(Type serviceType)
         {
+            var compileUnit = GenerateUnit(new GenerationOptions(serviceType));
+            string serviceTypeAssemblyName = serviceType.Assembly.ManifestModule.Name;
+
+            var options = new CompilerParameters(new[] { "ServiceStack.dll", "ServiceStack.ServiceInterface.dll", "ServiceStack.Interfaces.dll", serviceTypeAssemblyName });
+            var compiler = new CSharpCodeProvider();
+
+            var result = compiler.CompileAssemblyFromDom(options, compileUnit);
+
+            if (result.Errors.Count > 0)
+            {
+                throw new Exception("Failed to compile assembly :(");
+            }
+
+            return result.CompiledAssembly;
+        }
+
+        public string Generate(GenerationOptions options)
+        {
+            var compileUnit = this.GenerateUnit(options);
+
+            var provider = new CSharpCodeProvider();
+            using (var sw = new StringWriter())
+            {
+                provider.GenerateCodeFromCompileUnit(compileUnit, sw, new CodeGeneratorOptions {});
+                string codeText = sw.GetStringBuilder().ToString();
+                return SugarUp(codeText.Substring(codeText.IndexOf("using", System.StringComparison.Ordinal)));
+            }
+        }
+
+        public CodeCompileUnit GenerateUnit(GenerationOptions generationOptions)
+        {
+            string serviceInterfaceNamespace = "ServiceStack.ServiceInterface";
             var type = generationOptions.Target;
 
             var codeDomNamespace = new CodeNamespace("ServiceStackGen.Tests.Examples");
             var compileUnit = new CodeCompileUnit();
 
             var globalNamespace = new CodeNamespace();
-            globalNamespace.Imports.Add(new CodeNamespaceImport("ServiceStack.ServiceInterface"));
+            globalNamespace.Imports.Add(new CodeNamespaceImport(serviceInterfaceNamespace));
 
             compileUnit.Namespaces.Add(globalNamespace); 
             compileUnit.Namespaces.Add(codeDomNamespace);
             globalNamespace.Comments.Clear();
 
             var @class = new CodeTypeDeclaration(generationOptions.TypeName);
-            @class.BaseTypes.Add("Service");
+            @class.BaseTypes.Add(serviceInterfaceNamespace + ".Service");
             codeDomNamespace.Types.Add(@class);
 
-            @class.Members.Add(new CodeMemberField(type.Name, "_" + LowerCamelCase(type.Name)));
+            @class.Members.Add(new CodeMemberField(type.FullName, "_" + LowerCamelCase(type.Name)));
 
             //add constructor
             var ctor = new CodeConstructor();
-            ctor.Parameters.Add(new CodeParameterDeclarationExpression(type.Name,LowerCamelCase(type.Name)));
+            ctor.Parameters.Add(new CodeParameterDeclarationExpression(type.FullName,LowerCamelCase(type.Name)));
             ctor.Attributes = MemberAttributes.Public;
             
             @class.Members.Add(ctor);
@@ -142,15 +174,8 @@ namespace ServiceStackGen
                     @class.Members.Add(anyMethod);
                 });
 
-            var provider = new CSharpCodeProvider();
-            var sb = new StringBuilder();
-            using (var sw = new StringWriter(sb))
-            {
-                provider.GenerateCodeFromCompileUnit(compileUnit, sw, new CodeGeneratorOptions {});
-            }
-            var s = sb.ToString();
-            //remove generated comments
-            return SugarUp( s.Substring(s.IndexOf("using", System.StringComparison.Ordinal)));
+            return compileUnit;
+
         }
 
         private string SugarUp(string s)

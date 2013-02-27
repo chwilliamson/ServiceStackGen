@@ -28,6 +28,7 @@ _ReSharper.*
 *.vssscc
 *.suo
 *.Publish.xml
+TestResults/
 
 #approvals#
 *.received.txt

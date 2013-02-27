@@ -92,7 +92,9 @@
     </Compile>
     <Compile Include="Examples\ClassWith2Methods.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ServiceGeneratorTests.cs" />
     <Compile Include="ServiceStackWrapperGeneratorFixture.cs" />
+    <Compile Include="Services\SingleVoidOperationService.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\ServiceStackGen\ServiceStackGen.csproj">
