@@ -41,12 +41,7 @@ namespace ServiceStackGen.Tests
         public void ClassAndVariousMethodsMethodOmitted()
         {
             var gen = new ServiceStackWrapperGenerator();
-            var result = gen.Generate(new GenerationOptions
-                {
-                  Target  = typeof(Examples.ClassWith2Methods),
-                  TypeName = typeof(Examples.ClassWith2MethodsExpectedOmittingBarFoo).Name,
-                  MethodNameRegex = "FooBar"
-                });
+            var result = gen.Generate(new Generate.GenerationOptions(typeof(Examples.ClassWith2Methods), typeof(Examples.ClassWith2MethodsExpectedOmittingBarFoo).Name, "ServiceStackGen.Tests.Examples"));
             AssertResultEqual(result, typeof(Examples.ClassWith2MethodsExpectedOmittingBarFoo));
         }
 
