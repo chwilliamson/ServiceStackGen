@@ -52,26 +52,38 @@ let private addConstructor opts (typeDecl: CodeTypeDeclaration) =
     typeDecl.Members.Add(ctor) |> ignore
 
 let createPropertyDecl (name: string) (propertyType: Type) =
+    let backingFieldName = "_" + camelCase name
+    let backingField = new CodeMemberField(propertyType, backingFieldName)
+    let thisRef = new CodeThisReferenceExpression()
+    let fieldRef = new CodeFieldReferenceExpression(thisRef, backingFieldName)
+
     let propDecl = new CodeMemberProperty()
     propDecl.Name <- name
     propDecl.Type <- new CodeTypeReference(propertyType)
     propDecl.Attributes <- MemberAttributes.Public
     propDecl.HasGet <- true
     propDecl.HasSet <- true
-    propDecl
+
+    //create getter/setter bodies
+    propDecl.GetStatements.Add(new CodeMethodReturnStatement(fieldRef)) |> ignore
+    propDecl.SetStatements.Add(new CodeAssignStatement(fieldRef, new CodePropertySetValueReferenceExpression())) |> ignore
+
+    (backingField, propDecl)
 
 let genResponseType(methodInfo: MethodInfo) =
     let typeName = methodInfo.Name + "Result"
     let typeDecl = new CodeTypeDeclaration(typeName)
     if methodInfo.ReturnType <> typeof<System.Void> then
-        let resultProperty = createPropertyDecl responseTypeResultPropertyName methodInfo.ReturnType
+        let (field, resultProperty) = createPropertyDecl responseTypeResultPropertyName methodInfo.ReturnType
+        typeDecl.Members.Add(field) |> ignore
         typeDecl.Members.Add(resultProperty) |> ignore
     typeDecl
 
 let genRequestType(methodInfo: MethodInfo) =
     let typeDecl = new CodeTypeDeclaration(methodInfo.Name)
     methodInfo.GetParameters() |> Array.iter(fun param ->
-        let paramProp = createPropertyDecl (pascalCase methodInfo.Name) param.ParameterType
+        let (field, paramProp) = createPropertyDecl (pascalCase methodInfo.Name) param.ParameterType
+        typeDecl.Members.Add(field) |> ignore
         typeDecl.Members.Add(paramProp) |> ignore
     )
     typeDecl
