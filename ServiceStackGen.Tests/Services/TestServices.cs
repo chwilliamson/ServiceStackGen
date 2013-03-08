@@ -1,10 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
 namespace ServiceStackGen.Tests.Services
 {
+    public interface IServiceWithNoMethods
+    {
+    }
+
     public interface ISingleVoidOperationService
     {
         void DoSomethingReally();
@@ -18,5 +21,16 @@ namespace ServiceStackGen.Tests.Services
     public interface IServiceWithSingleVoidMethodWithParameters
     {
         void DoTheNeedful(string arg1, int arg2);
+    }
+
+    public interface IServiceWithSingleMethodWithParametersAndReturnValue
+    {
+        int GetCount(object arg1, int arg2, string arg3);
+    }
+
+    public interface IServiceWithMultipleMethods
+    {
+        void Method1();
+        int Method2(string arg1);
     }
 }

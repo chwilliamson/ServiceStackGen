@@ -8,8 +8,6 @@ open System.CodeDom.Compiler
 open Generate
 
 type ServiceStackWrapperGenerator() =
-    member this.makeVirtual (codeText: string) =
-        codeText.Replace("abstract", "virtual")
 
     member this.Generate(opts: GenerationOptions) =
         let codeUnit = GenerateUnit(opts)
@@ -20,7 +18,6 @@ type ServiceStackWrapperGenerator() =
         use sw = new System.IO.StringWriter()
         provider.GenerateCodeFromCompileUnit(codeUnit, sw, new CodeGeneratorOptions())
         sw.GetStringBuilder().ToString()
-        
 
     member this.Generate(t: Type) =
         this.Generate(GenerationOptions.fromType(t))

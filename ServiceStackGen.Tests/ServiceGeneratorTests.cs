@@ -15,6 +15,18 @@ namespace ServiceStackGen.Tests
     public class ServiceGeneratorTests
     {
         [Test]
+        public void ShouldGenerateServiceWithNoMethods()
+        {
+            Assembly assembly = new ServiceStackWrapperGenerator().GenerateAssembly(typeof(IServiceWithNoMethods));
+            Type[] types = assembly.GetTypes();
+
+            IServiceWithNoMethods mockService = MockRepository.GenerateStub<IServiceWithNoMethods>();
+            object service = CreateService<IServiceWithNoMethods>(types, mockService);
+
+            Assert.IsNotNull(service);
+        }
+
+        [Test]
         public void ShouldGenerateServiceWithSingleVoidMethod()
         {
             Assembly assembly = new ServiceStackWrapperGenerator().GenerateAssembly(typeof(ISingleVoidOperationService));
@@ -74,6 +86,64 @@ namespace ServiceStackGen.Tests
             Assert.AreEqual(responseString, response.Result);
         }
 
+        [Test]
+        public void ShouldGenerateServiceWithSingleMethodWithParametersAndReturnValue()
+        {
+            Assembly assembly = new ServiceStackWrapperGenerator().GenerateAssembly(typeof(IServiceWithSingleMethodWithParametersAndReturnValue));
+            Type[] types = assembly.GetTypes();
+
+            var mockService = MockRepository.GenerateStub<IServiceWithSingleMethodWithParametersAndReturnValue>();
+            int result = 4;
+            object arg1 = new object();
+            int arg2 = 7;
+            string arg3 = "arg3";
+
+            mockService.Stub(s => s.GetCount(arg1, arg2, arg3)).Return(result);
+
+            object service = CreateService<IServiceWithSingleMethodWithParametersAndReturnValue>(types, mockService);
+            var rrTypes = GetRequestResponseTypes<IServiceWithSingleMethodWithParametersAndReturnValue>(s => s.GetCount(arg1, arg2, arg3), types);
+
+            dynamic request = Activator.CreateInstance(rrTypes.RequestType);
+            request.Arg1 = arg1;
+            request.Arg2 = arg2;
+            request.Arg3 = arg3;
+
+            dynamic response = service.Any((object)request);
+            Assert.AreEqual(result, response.Result);
+        }
+
+        [Test]
+        public void ShouldGenerateServiceWithMultipleMethods()
+        {
+            Assembly assembly = new ServiceStackWrapperGenerator().GenerateAssembly(typeof(IServiceWithMultipleMethods));
+            Type[] types = assembly.GetTypes();
+
+            var mockService = MockRepository.GenerateMock<IServiceWithMultipleMethods>();
+
+            object service = CreateService<IServiceWithMultipleMethods>(types, mockService);
+
+            //method1
+            var rrTypes1 = GetRequestResponseTypes<IServiceWithMultipleMethods>(s => s.Method1(), types);
+            object request1 = Activator.CreateInstance(rrTypes1.RequestType);
+            object response1 = service.Any(request1);
+
+            mockService.AssertWasCalled(s => s.Method1());
+            Assert.IsInstanceOf(rrTypes1.ResponseType, response1);
+
+            //method 2
+            string arg1 = "arg1";
+            int result = 1;
+            var rrTypes2 = GetRequestResponseTypes<IServiceWithMultipleMethods>(s => s.Method2(arg1), types);
+
+            mockService.Expect(s => s.Method2(arg1)).Return(result);
+
+            dynamic request2 = Activator.CreateInstance(rrTypes2.RequestType);
+            request2.Arg1 = arg1;
+
+            dynamic response2 = service.Any((object)request2);
+            Assert.AreEqual(result, response2.Result);
+        }
+
         public dynamic CreateService<T>(Type[] types, T service)
         {
             Type serviceWrapperType = GetServiceWrapperType<T>(types);
@@ -100,7 +170,7 @@ namespace ServiceStackGen.Tests
 
     public static class ServiceExtensions
     {
-        public static object Any(this object service, dynamic request)
+        public static object Any(this object service, object request)
         {
             MethodInfo method = service.GetType().GetMethod("Any", new Type[] { request.GetType() });
             return method.Invoke(service, new object[] { request });

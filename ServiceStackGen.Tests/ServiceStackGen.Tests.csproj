@@ -80,27 +80,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Examples\ClassAndVariousMethods.cs" />
-    <Compile Include="Examples\ClassAndVariousMethodsExpected.cs">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Compile>
-    <Compile Include="Examples\ClassOnly.cs" />
-    <Compile Include="Examples\ClassOnlyExpected.cs">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Compile>
     <Compile Include="Examples\ClassWith2MethodsExpectedOmittingBarFoo.cs">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Compile>
-    <Compile Include="Examples\ClassWithAVoidMethodAndParameters.cs" />
-    <Compile Include="Examples\ClassWithAVoidMethodAndParametersExpected.cs">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Compile>
-    <Compile Include="Examples\ClassWithOneMethod.cs" />
-    <Compile Include="Examples\ClassWithOneMethodAndParameterAndReturn.cs" />
-    <Compile Include="Examples\ClassWithOneMethodAndParameterAndReturnExpected.cs">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Compile>
-    <Compile Include="Examples\ClassWithOneMethodExpected.cs">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Compile>
     <Compile Include="Examples\ClassWith2Methods.cs" />
