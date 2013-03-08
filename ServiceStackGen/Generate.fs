@@ -4,6 +4,8 @@ open System
 open System.Reflection
 open System.CodeDom
 
+type RequestResponseType = { RequestType: Type; ResponseType: Type }
+
 type GenerationOptions =
     {
         source: Type;
@@ -82,7 +84,7 @@ let genResponseType(methodInfo: MethodInfo) =
 let genRequestType(methodInfo: MethodInfo) =
     let typeDecl = new CodeTypeDeclaration(methodInfo.Name)
     methodInfo.GetParameters() |> Array.iter(fun param ->
-        let (field, paramProp) = createPropertyDecl (pascalCase methodInfo.Name) param.ParameterType
+        let (field, paramProp) = createPropertyDecl (pascalCase param.Name) param.ParameterType
         typeDecl.Members.Add(field) |> ignore
         typeDecl.Members.Add(paramProp) |> ignore
     )
@@ -122,7 +124,6 @@ let genAnyMethod (methodInfo: MethodInfo) (request: CodeTypeDeclaration) (respon
     methodDecl.Statements.Add(new CodeMethodReturnStatement(responseVarRef)) |> ignore
 
     methodDecl
-    
 
 let GenerateUnit(opts: GenerationOptions) =
     let compileUnit = new CodeCompileUnit()
