@@ -8,7 +8,7 @@ namespace ServiceStackGen.Tests
     [TestFixture]
     public class ServiceStackWrapperGeneratorFixture
     {
-        [Test]
+        [Test, Ignore("Figure out whether this is needed")]
         public void ClassAndVariousMethodsMethodOmitted()
         {
             var gen = new ServiceStackWrapperGenerator();

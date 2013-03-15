@@ -5,6 +5,9 @@ open System.Reflection
 open System.CodeDom
 
 type RequestResponseType = { RequestType: Type; ResponseType: Type }
+type private RequestInfo = { TypeName: string; Parameters: ParameterInfo array }
+type private ResponseInfo = { TypeName: string; ReturnType: Type option }
+type private RequestResponseInfo = { Request: RequestInfo; Response: ResponseInfo }
 
 type GenerationOptions =
     {
@@ -81,9 +84,17 @@ let genResponseType(methodInfo: MethodInfo) =
         typeDecl.Members.Add(resultProperty) |> ignore
     typeDecl
 
-let genRequestType(methodInfo: MethodInfo) =
-    let typeDecl = new CodeTypeDeclaration(methodInfo.Name)
-    methodInfo.GetParameters() |> Array.iter(fun param ->
+let getIRequestDecl (reqTypeName: string) =
+    let ifaceType = typedefof<ServiceStack.ServiceHost.IReturn<_>>
+    let typeRef = new CodeTypeReference(ifaceType)
+    typeRef.TypeArguments.Add(reqTypeName) |> ignore
+    typeRef
+
+let private genRequestType { Request = { TypeName = typeName; Parameters = parameters }; Response = { TypeName = responseTypeName } } =
+    let typeDecl = new CodeTypeDeclaration(typeName)
+    let ireturnInterfaceDecl = getIRequestDecl responseTypeName
+    typeDecl.BaseTypes.Add(ireturnInterfaceDecl) |> ignore
+    parameters |> Array.iter(fun param ->
         let (field, paramProp) = createPropertyDecl (pascalCase param.Name) param.ParameterType
         typeDecl.Members.Add(field) |> ignore
         typeDecl.Members.Add(paramProp) |> ignore
@@ -144,7 +155,10 @@ let GenerateUnit(opts: GenerationOptions) =
     //get service methods and generate request and response types
     let methods = opts.source.GetMethods(BindingFlags.Public ||| BindingFlags.Instance ||| BindingFlags.DeclaredOnly)
     methods |> Array.iter(fun m ->
-        let requestTypeDecl = genRequestType m
+        let requestInfo = { TypeName = m.Name; Parameters = m.GetParameters() }
+        let responseInfo = { TypeName = m.Name + "Result"; ReturnType = if m.ReturnType = typeof<System.Void> then None else Some(m.ReturnType) }
+        let rrInfo = { Request = requestInfo; Response = responseInfo }
+        let requestTypeDecl = genRequestType rrInfo
         let responseTypeDecl = genResponseType m
         let anyMethod = genAnyMethod m requestTypeDecl responseTypeDecl
 

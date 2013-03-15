@@ -5,7 +5,7 @@ using System.Linq.Expressions;
 using System.Reflection;
 using NUnit.Framework;
 using Rhino.Mocks;
-
+using ServiceStack.ServiceHost;
 using ServiceStackGen;
 using ServiceStackGen.Tests.Services;
 
@@ -142,6 +142,17 @@ namespace ServiceStackGen.Tests
 
             dynamic response2 = service.Any((object)request2);
             Assert.AreEqual(result, response2.Result);
+        }
+
+        [Test]
+        public void RequestTypeShouldImplementIReturn()
+        {
+            Assembly assembly = new ServiceStackWrapperGenerator().GenerateAssembly(typeof(IServiceWithSingleMethodWithReturnValue));
+            Type[] types = assembly.GetTypes();
+
+            var rrTypes = GetRequestResponseTypes<IServiceWithSingleMethodWithReturnValue>(s => s.GetString(), types);
+            Type iReturnInterfaceType = typeof(IReturn<>).MakeGenericType(rrTypes.ResponseType);
+            Assert.IsTrue(iReturnInterfaceType.IsAssignableFrom(rrTypes.RequestType), "Request type does not implement IReturn<Response>");
         }
 
         public dynamic CreateService<T>(Type[] types, T service)
