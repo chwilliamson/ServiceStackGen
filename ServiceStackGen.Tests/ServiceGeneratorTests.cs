@@ -158,7 +158,8 @@ namespace ServiceStackGen.Tests
 
         [Test]
         public void ShouldDecorateRequestAndResponseTypesWithSerialisationAttributes()
-        {            Assembly assembly = new ServiceStackWrapperGenerator().GenerateAssembly(typeof(IServiceWithSingleMethodWithParametersAndReturnValue));
+        {
+            Assembly assembly = new ServiceStackWrapperGenerator().GenerateAssembly(typeof(IServiceWithSingleMethodWithParametersAndReturnValue));
             Type[] types = assembly.GetTypes();
 
             var rrTypes = GetRequestResponseTypes<IServiceWithSingleMethodWithParametersAndReturnValue>(s => s.GetCount(1,2, "sdfs"), types);
