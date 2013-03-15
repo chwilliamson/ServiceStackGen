@@ -25,7 +25,7 @@ type ServiceStackWrapperGenerator() =
     member this.GenerateAssembly(serviceType: Type) =
         let codeUnit = GenerateUnit(GenerationOptions.fromType(serviceType))
         let codeText = this.Dump(codeUnit);
-        let compilerParams = new CompilerParameters([| "ServiceStack.dll"; "ServiceStack.ServiceInterface.dll"; "ServiceStack.Interfaces.dll"; serviceType.Assembly.ManifestModule.Name |])
+        let compilerParams = new CompilerParameters([| "ServiceStack.dll"; "ServiceStack.ServiceInterface.dll"; "System.Runtime.Serialization.dll"; "ServiceStack.Interfaces.dll"; serviceType.Assembly.ManifestModule.Name |])
         let compiler = new Microsoft.CSharp.CSharpCodeProvider()
 
         let result = compiler.CompileAssemblyFromDom(compilerParams, codeUnit)

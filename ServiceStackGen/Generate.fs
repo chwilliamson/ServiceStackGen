@@ -136,6 +136,17 @@ let genAnyMethod (methodInfo: MethodInfo) (request: CodeTypeDeclaration) (respon
 
     methodDecl
 
+let decorate (typeDecl: CodeTypeDeclaration) =
+    typeDecl.CustomAttributes.Add(new CodeAttributeDeclaration(typeof<System.Runtime.Serialization.DataContractAttribute>.FullName)) |> ignore
+    typeDecl.Members
+        |> Seq.cast
+        |> Seq.choose(fun m -> match box m with
+                                | :? CodeMemberProperty as p -> Some(p)
+                                | _ -> None)
+        |> Seq.cast<CodeMemberProperty>
+        |> Seq.iter(fun p -> p.CustomAttributes.Add(new CodeAttributeDeclaration(typeof<System.Runtime.Serialization.DataMemberAttribute>.FullName)) |> ignore)
+    typeDecl
+
 let GenerateUnit(opts: GenerationOptions) =
     let compileUnit = new CodeCompileUnit()
 
@@ -158,8 +169,8 @@ let GenerateUnit(opts: GenerationOptions) =
         let requestInfo = { TypeName = m.Name; Parameters = m.GetParameters() }
         let responseInfo = { TypeName = m.Name + "Result"; ReturnType = if m.ReturnType = typeof<System.Void> then None else Some(m.ReturnType) }
         let rrInfo = { Request = requestInfo; Response = responseInfo }
-        let requestTypeDecl = genRequestType rrInfo
-        let responseTypeDecl = genResponseType m
+        let requestTypeDecl = genRequestType rrInfo |> decorate
+        let responseTypeDecl = genResponseType m |> decorate
         let anyMethod = genAnyMethod m requestTypeDecl responseTypeDecl
 
         ns.Types.Add(requestTypeDecl) |> ignore

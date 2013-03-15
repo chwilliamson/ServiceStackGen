@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using System.Runtime.Serialization;
 using NUnit.Framework;
 using Rhino.Mocks;
 using ServiceStack.ServiceHost;
@@ -153,6 +154,29 @@ namespace ServiceStackGen.Tests
             var rrTypes = GetRequestResponseTypes<IServiceWithSingleMethodWithReturnValue>(s => s.GetString(), types);
             Type iReturnInterfaceType = typeof(IReturn<>).MakeGenericType(rrTypes.ResponseType);
             Assert.IsTrue(iReturnInterfaceType.IsAssignableFrom(rrTypes.RequestType), "Request type does not implement IReturn<Response>");
+        }
+
+        [Test]
+        public void ShouldDecorateRequestAndResponseTypesWithSerialisationAttributes()
+        {            Assembly assembly = new ServiceStackWrapperGenerator().GenerateAssembly(typeof(IServiceWithSingleMethodWithParametersAndReturnValue));
+            Type[] types = assembly.GetTypes();
+
+            var rrTypes = GetRequestResponseTypes<IServiceWithSingleMethodWithParametersAndReturnValue>(s => s.GetCount(1,2, "sdfs"), types);
+
+            AssertHasAttribute<DataContractAttribute>(rrTypes.RequestType);
+            AssertHasAttribute<DataContractAttribute>(rrTypes.ResponseType);
+
+            var allProperties = rrTypes.RequestType.GetProperties().Concat(rrTypes.ResponseType.GetProperties());
+            foreach (PropertyInfo prop in allProperties)
+            {
+                AssertHasAttribute<DataMemberAttribute>(prop);
+            }
+        }
+
+        private static void AssertHasAttribute<TAttribute>(MemberInfo member) where TAttribute : Attribute
+        {
+            int attrCount = member.GetCustomAttributes(typeof(TAttribute), false).Length;
+            Assert.GreaterOrEqual(attrCount, 1, "Member {0} does is not decorated with attribute {1}", member.Name, typeof(TAttribute).Name);
         }
 
         public dynamic CreateService<T>(Type[] types, T service)
