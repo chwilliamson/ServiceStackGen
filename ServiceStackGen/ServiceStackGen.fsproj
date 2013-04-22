@@ -43,13 +43,13 @@
   <Import Project="$(SolutionDir)\.nuget\nuget.targets" />
   <ItemGroup>
     <Compile Include="Utils.fs" />
+    <Compile Include="CommandOptions.fs" />
     <Compile Include="CodeModel.fs" />
     <Compile Include="TypeParser.fs" />
     <Compile Include="CodeGen.fs" />
     <Compile Include="Generate.fs" />
     <Compile Include="ServiceStackWrapperGenerator.fs" />
     <None Include="packages.config" />
-    <Compile Include="CommandOptions.fs" />
     <Compile Include="GenOutput.fs" />
     <Compile Include="Main.fs" />
   </ItemGroup>

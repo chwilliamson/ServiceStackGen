@@ -6,8 +6,8 @@ open Utils
 open Generator
 open CommandOptions
 
-let generateAndWrite path (serviceType: Type) =
-    let src = generate serviceType
+let generateAndWrite path (opts: Options) (serviceType: Type) =
+    let src = generate opts serviceType
     File.WriteAllText(path, src)
 
 let isCompilerGenerated (t: Type) =
@@ -27,4 +27,4 @@ let generateAll (opts: Options) =
     if(not (Directory.Exists(targetDir))) then
         Directory.CreateDirectory(targetDir) |> ignore
 
-    types |> Seq.iter (fun t -> generateAndWrite (Path.Combine(targetDir, t.Name + ".cs")) t) |> ignore
+    types |> Seq.iter (fun t -> generateAndWrite (Path.Combine(targetDir, t.Name + ".cs")) opts t) |> ignore

@@ -3,7 +3,9 @@
 open System
 open System.Reflection
 open System.CodeDom
+
 open Utils
+open CommandOptions
 open CodeModel
 open TypeParser
 open CodeGen
@@ -13,20 +15,12 @@ type private RequestInfo = { TypeName: string; Parameters: ParameterInfo array }
 type private ResponseInfo = { TypeName: string; ReturnType: Type option }
 type private RequestResponseInfo = { Request: RequestInfo; Response: ResponseInfo }
 
-type GenerationOptions =
-    {
-        source: Type;
-        targetTypeName: string;
-        targetNamespace: string
-    }
-    static member fromType(t: Type) = { source = t; targetTypeName = t.Name + "Expected"; targetNamespace = "ServiceStackGen.Tests.Examples" }
-
 let private serviceStackInterfaceNs = "ServiceStack.ServiceInterface"
 let private serviceMemberName = "_service"
 let private responseTypeResultPropertyName = "Result"
 
 let private addNamespaces opts (compileUnit: CodeCompileUnit) =
-    let codeDomNamespace = new CodeNamespace(opts.targetNamespace)
+    let codeDomNamespace = new CodeNamespace(opts.TargetNamespace)
     let globalNamespace = new CodeNamespace()
     globalNamespace.Imports.Add(new CodeNamespaceImport(serviceStackInterfaceNs))
 
@@ -46,17 +40,17 @@ let decorate (typeDecl: CodeTypeDeclaration) =
         |> Seq.iter(fun p -> p.CustomAttributes.Add(new CodeAttributeDeclaration(typeof<System.Runtime.Serialization.DataMemberAttribute>.FullName)) |> ignore)
     typeDecl
 
-let serviceFromOptions { source = serviceType; targetTypeName = name } =
-    { MemberName = "_service"; TargetTypeName = name; Type = serviceType; Methods = [] }
+let serviceFromOptions (serviceType: Type) (targetNamespace: string) =
+    { MemberName = "_service"; TargetTypeName = targetNamespace; Type = serviceType; Methods = [] }
 
-let GenerateUnit(opts: GenerationOptions) =
+let GenerateUnit (opts: Options) (serviceType: Type) =
     let compileUnit = new CodeCompileUnit()
 
     //add namespaces
     let ns = addNamespaces opts compileUnit
-    let service = serviceFromOptions opts
+    let service = serviceFromOptions serviceType opts.TargetNamespace
 
-    let serviceModel = parseService opts.source
+    let serviceModel = parseService serviceType
     let decorated = decorateSerialisation serviceModel
     genServiceTypes decorated |> Seq.iter (fun typeDecl -> ns.Types.Add(typeDecl) |> ignore)
 
