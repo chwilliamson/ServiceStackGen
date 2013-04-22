@@ -31,3 +31,7 @@ type ServiceStackWrapperGenerator() =
         let result = compiler.CompileAssemblyFromDom(compilerParams, codeUnit)
         if result.Errors.Count > 0 then failwith "Failed to compile assembly"
         result.CompiledAssembly
+
+module Generator =
+    let generate (t: Type) =
+        let gen = new ServiceStackWrapperGenerator() in gen.Generate(t)
