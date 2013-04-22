@@ -1,37 +1,40 @@
 ﻿module ServiceStackGen.Main
 open System
+open System.IO
 open System.Reflection
 
+open Utils
 open GenOutput
 open CommandOptions
 
+let usageLines =
+    [   "Usage: ServiceStackGen /srcns:SourceNamespace /tns:TargetNamespace /dir:OutputDir /asm:assembly";
+        "ServiceStackGen  is a utility which generates a ServiceStack wrapper class for any service";
+        "under the specified source namespace. The generated class takes it's namespace from target";
+        "namespace and the source files are placed in the supplied output pulder.";
+        "  /srcns    - Namespace of the source services";
+        "  /tns      - Namespace of the target classes";
+        "  /dir      - Output folder to put generated files";
+        "  /asm      - The source assembly containing the source services"
+    ]
+
+let printLines lines = lines |> Seq.iter (fun s -> printfn "%s" s)
+let printUsage () = printLines usageLines
+
+let loadOptions argv =
+    match argv with
+    | [| |] -> loadOptFile "options.xml"
+    | [| path |] -> loadOptFile path
+    | [| arg1; arg2; arg3; arg4 |] ->
+        loadOpts arg1 arg2 arg3 arg4
+    | _ -> Left(["Unexpected number of options"])
+
 [<EntryPoint>]
 let main argv = 
-    match argv with
-    | [| arg1; arg2; arg3; arg4 |] ->
-        let assm =  try Some(Assembly.LoadFrom(arg4))
-                    with
-                    | ex -> printfn "%s" ex.Message; None
-
-        match assm with
-        | Some(assembly) ->
-            match parseOptions assembly [arg1; arg2; arg3] with
-            | Success(options) -> 
-                generateAll options
-                0
-            | Fail(errs) ->
-                Seq.iter (fun err -> printfn "%s" err) errs |> ignore
-                //System.Console.ReadLine() |> ignore
-                -1
-        | None -> -1
-    | _ ->
-        printfn "Usage: ServiceStackGen /srcns:SourceNamespace /tns:TargetNamespace /dir:OutputDir assembly"
-        printfn "ServiceStackGen  is a utility which generates a ServiceStack wrapper class for any service"
-        printfn "under the specified source namespace. The generated class takes it's namespace from target"
-        printfn "namespace and the source files are placed in the supplied output pulder."
-        printfn "  /srcns    - Namespace of the source services"
-        printfn "  /tns      - Namespace of the target classes"
-        printfn "  /dir      - Output folder to put generated files"
-        printfn "  assembly  - The source assembly containing the source services"
-       // System.Console.ReadLine() |> ignore
+    match loadOptions argv with
+    | Left(errs) ->
+        printLines (errs @ (System.Environment.NewLine :: usageLines))
         -1
+    | Right(opts) ->
+        generateAll opts
+        0
