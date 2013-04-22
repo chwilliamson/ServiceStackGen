@@ -16,6 +16,7 @@
 /lib
 nuget.exe
 .nuget/
+options.xml
 
 #resharper#
 _ReSharper.*

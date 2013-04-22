@@ -24,8 +24,6 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <WarningLevel>3</WarningLevel>
     <DocumentationFile>bin\Debug\ServiceStackGen.XML</DocumentationFile>
-    <StartArguments>
-    </StartArguments>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -43,13 +41,13 @@
   <Import Project="$(SolutionDir)\.nuget\nuget.targets" />
   <ItemGroup>
     <Compile Include="Utils.fs" />
+    <Compile Include="CommandOptions.fs" />
     <Compile Include="CodeModel.fs" />
     <Compile Include="TypeParser.fs" />
     <Compile Include="CodeGen.fs" />
     <Compile Include="Generate.fs" />
     <Compile Include="ServiceStackWrapperGenerator.fs" />
     <None Include="packages.config" />
-    <Compile Include="CommandOptions.fs" />
     <Compile Include="GenOutput.fs" />
     <Compile Include="Main.fs" />
   </ItemGroup>
@@ -95,12 +93,14 @@
     <Reference Include="System.Core" />
     <Reference Include="System.Numerics" />
     <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.Xml" />
+    <Reference Include="System.Xml.Linq" />
   </ItemGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">
-  </Target>
+  </Target-->
   <Target Name="AfterBuild">
+    <Copy SourceFiles="$(MSBuildProjectDirectory)/options.xml" DestinationFolder="$(MSBuildProjectDirectory)/bin/$(Configuration)" ContinueOnError="true" />
   </Target>
-  -->
 </Project>

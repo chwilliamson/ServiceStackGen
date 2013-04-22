@@ -18,7 +18,7 @@ namespace ServiceStackGen.Tests
         [Test]
         public void ShouldGenerateServiceWithNoMethods()
         {
-            Assembly assembly = new ServiceStackWrapperGenerator().GenerateAssembly(typeof(IServiceWithNoMethods));
+            Assembly assembly = GenerateAssembly<IServiceWithNoMethods>();
             Type[] types = assembly.GetTypes();
 
             IServiceWithNoMethods mockService = MockRepository.GenerateStub<IServiceWithNoMethods>();
@@ -30,7 +30,7 @@ namespace ServiceStackGen.Tests
         [Test]
         public void ShouldGenerateServiceWithSingleVoidMethod()
         {
-            Assembly assembly = new ServiceStackWrapperGenerator().GenerateAssembly(typeof(ISingleVoidOperationService));
+            Assembly assembly = GenerateAssembly<ISingleVoidOperationService>();
             Type[] types = assembly.GetTypes();
 
             var mockService = MockRepository.GenerateMock<Services.ISingleVoidOperationService>();
@@ -48,7 +48,7 @@ namespace ServiceStackGen.Tests
         [Test]
         public void ShouldGenerateServiceWithVoidMethodWithArguments()
         {
-            Assembly assembly = new ServiceStackWrapperGenerator().GenerateAssembly(typeof(IServiceWithSingleVoidMethodWithParameters));
+            Assembly assembly = GenerateAssembly<IServiceWithSingleVoidMethodWithParameters>();
             Type[] types = assembly.GetTypes();
 
             var mockService = MockRepository.GenerateStub<IServiceWithSingleVoidMethodWithParameters>();
@@ -71,7 +71,7 @@ namespace ServiceStackGen.Tests
         [Test]
         public void ShouldGenerateServiceWithSingleMethodWithReturnValue()
         {
-            Assembly assembly = new ServiceStackWrapperGenerator().GenerateAssembly(typeof(IServiceWithSingleMethodWithReturnValue));
+            Assembly assembly = GenerateAssembly<IServiceWithSingleMethodWithReturnValue>();
             Type[] types = assembly.GetTypes();
 
             var mockService = MockRepository.GenerateStub<IServiceWithSingleMethodWithReturnValue>();
@@ -90,7 +90,7 @@ namespace ServiceStackGen.Tests
         [Test]
         public void ShouldGenerateServiceWithSingleMethodWithParametersAndReturnValue()
         {
-            Assembly assembly = new ServiceStackWrapperGenerator().GenerateAssembly(typeof(IServiceWithSingleMethodWithParametersAndReturnValue));
+            Assembly assembly = GenerateAssembly<IServiceWithSingleMethodWithParametersAndReturnValue>();
             Type[] types = assembly.GetTypes();
 
             var mockService = MockRepository.GenerateStub<IServiceWithSingleMethodWithParametersAndReturnValue>();
@@ -116,7 +116,7 @@ namespace ServiceStackGen.Tests
         [Test]
         public void ShouldGenerateServiceWithMultipleMethods()
         {
-            Assembly assembly = new ServiceStackWrapperGenerator().GenerateAssembly(typeof(IServiceWithMultipleMethods));
+            Assembly assembly = GenerateAssembly<IServiceWithMultipleMethods>();
             Type[] types = assembly.GetTypes();
 
             var mockService = MockRepository.GenerateMock<IServiceWithMultipleMethods>();
@@ -148,7 +148,7 @@ namespace ServiceStackGen.Tests
         [Test]
         public void RequestTypeShouldImplementIReturn()
         {
-            Assembly assembly = new ServiceStackWrapperGenerator().GenerateAssembly(typeof(IServiceWithSingleMethodWithReturnValue));
+            Assembly assembly = GenerateAssembly<IServiceWithSingleMethodWithReturnValue>();
             Type[] types = assembly.GetTypes();
 
             var rrTypes = GetRequestResponseTypes<IServiceWithSingleMethodWithReturnValue>(s => s.GetString(), types);
@@ -159,7 +159,7 @@ namespace ServiceStackGen.Tests
         [Test]
         public void ShouldDecorateRequestAndResponseTypesWithSerialisationAttributes()
         {
-            Assembly assembly = new ServiceStackWrapperGenerator().GenerateAssembly(typeof(IServiceWithSingleMethodWithParametersAndReturnValue));
+            Assembly assembly = GenerateAssembly<IServiceWithSingleMethodWithParametersAndReturnValue>();
             Type[] types = assembly.GetTypes();
 
             var rrTypes = GetRequestResponseTypes<IServiceWithSingleMethodWithParametersAndReturnValue>(s => s.GetCount(1,2, "sdfs"), types);
@@ -174,7 +174,12 @@ namespace ServiceStackGen.Tests
             }
         }
 
-        public object GetObj() { return "sdfs"; }
+        private static Assembly GenerateAssembly<T>()
+        {
+            var generationOptions = new ServiceStackGen.CommandOptions.Options("sdfs", "ServiceStackGen.Tests.Examples", @"c:\temp", Assembly.GetExecutingAssembly());
+            var ssGen = new ServiceStackWrapperGenerator();
+            return ssGen.GenerateAssembly(generationOptions, typeof(T));
+        }
 
         private static void AssertHasAttribute<TAttribute>(MemberInfo member) where TAttribute : Attribute
         {
