@@ -209,8 +209,12 @@ namespace ServiceStackGen.Tests
             MethodInfo method = ((MethodCallExpression)invokeExpr.Body).Method;
             string methodName = method.Name;
             string pascalCase = Char.ToUpperInvariant(methodName[0]) + methodName.Substring(1);
-            Type requestType = types.Single(t => t.Name == pascalCase);
-            Type responseType = types.Single(t => t.Name == pascalCase + "Result");
+
+            string serviceTypeName = GetOutputTypeName<T>();
+            var dtoTypeNames = Generator.GetRequestResponseTypeNames(serviceTypeName, pascalCase);
+
+            Type requestType = types.Single(t => t.Name == dtoTypeNames.Item1);
+            Type responseType = types.Single(t => t.Name == dtoTypeNames.Item2);
 
             return new Generate.RequestResponseType(requestType, responseType);
         }

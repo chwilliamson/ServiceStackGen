@@ -29,3 +29,5 @@ module Generator =
         let result = compiler.CompileAssemblyFromDom(compilerParams, codeUnit)
         if result.Errors.Count > 0 then failwith "Failed to compile assembly"
         result.CompiledAssembly
+
+    let GetRequestResponseTypeNames (serviceName: string) (methodName: string) = TypeParser.getRequestResponseTypeNames serviceName methodName
