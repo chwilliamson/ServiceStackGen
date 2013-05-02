@@ -9,9 +9,9 @@ open CommandOptions
 
 let usageLines =
     [   "Usage: ServiceStackGen /srcns:SourceNamespace /tns:TargetNamespace /dir:OutputDir /asm:assembly";
-        "ServiceStackGen  is a utility which generates a ServiceStack wrapper class for any service";
-        "under the specified source namespace. The generated class takes it's namespace from target";
-        "namespace and the source files are placed in the supplied output pulder.";
+        "ServiceStackGen is a utility which generates a ServiceStack wrapper class for any service";
+        "under the specified source namespace found in the input assembly. The generated class is generated in the given target";
+        "namespace and the source files are placed in the specified output folder.";
         "  /srcns    - Namespace of the source services";
         "  /tns      - Namespace of the target classes";
         "  /dir      - Output folder to put generated files";
