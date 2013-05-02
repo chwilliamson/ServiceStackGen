@@ -177,9 +177,8 @@ namespace ServiceStackGen.Tests
         private static Assembly GenerateAssembly<T>()
         {
             var commandOptions = new ServiceStackGen.CommandOptions.Options("sdfs", "ServiceStackGen.Tests.Examples", @"c:\temp", Assembly.GetExecutingAssembly());
-            var ssGen = new ServiceStackWrapperGenerator();
             var genOptions = new ServiceStackGen.GenerationOptions.GenerationOptions(typeof(T), GetOutputTypeName<T>());
-            return ssGen.GenerateAssembly(commandOptions, genOptions);
+            return ServiceStackGen.Generator.GenerateAssembly(commandOptions, genOptions);
         }
 
         private static void AssertHasAttribute<TAttribute>(MemberInfo member) where TAttribute : Attribute

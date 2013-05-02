@@ -8,7 +8,7 @@ open CommandOptions
 open GenerationOptions
 
 let generateAndWrite path (opts: Options) (genOptions: GenerationOptions) =
-    let src = generate opts genOptions
+    let src = Generate opts genOptions
     File.WriteAllText(path, src)
 
 let generateAndWriteType (targetDir: string) (opts: Options) (t: Type) =
