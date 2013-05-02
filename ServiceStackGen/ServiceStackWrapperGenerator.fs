@@ -6,12 +6,13 @@ open System.CodeDom
 open System.CodeDom.Compiler
 
 open CommandOptions
+open GenerationOptions
 open Generate
 
 type ServiceStackWrapperGenerator() =
 
-    member this.Generate (opts: Options) (serviceType: Type) =
-        let codeUnit = GenerateUnit opts serviceType
+    member this.Generate (opts: Options) (genOptions: GenerationOptions) =
+        let codeUnit = GenerateUnit opts genOptions
         this.Dump(codeUnit)
 
     member private this.Dump(codeUnit: CodeCompileUnit) =
@@ -20,10 +21,10 @@ type ServiceStackWrapperGenerator() =
         provider.GenerateCodeFromCompileUnit(codeUnit, sw, new CodeGeneratorOptions())
         sw.GetStringBuilder().ToString()
 
-    member this.GenerateAssembly (opts: Options) (serviceType: Type) =
-        let codeUnit = GenerateUnit opts serviceType
+    member this.GenerateAssembly (opts: Options) (genOptions: GenerationOptions) =
+        let codeUnit = GenerateUnit opts genOptions
         let codeText = this.Dump(codeUnit);
-        let compilerParams = new CompilerParameters([| "ServiceStack.dll"; "ServiceStack.ServiceInterface.dll"; "System.Runtime.Serialization.dll"; "ServiceStack.Interfaces.dll"; serviceType.Assembly.ManifestModule.Name |])
+        let compilerParams = new CompilerParameters([| "ServiceStack.dll"; "ServiceStack.ServiceInterface.dll"; "System.Runtime.Serialization.dll"; "ServiceStack.Interfaces.dll"; genOptions.ServiceType.Assembly.ManifestModule.Name |])
         let compiler = new Microsoft.CSharp.CSharpCodeProvider()
 
         let result = compiler.CompileAssemblyFromDom(compilerParams, codeUnit)
@@ -31,5 +32,5 @@ type ServiceStackWrapperGenerator() =
         result.CompiledAssembly
 
 module Generator =
-    let generate (opts: Options) (t: Type) =
-        let gen = new ServiceStackWrapperGenerator() in gen.Generate opts t
+    let generate (opts: Options) (genOptions: GenerationOptions) =
+        let gen = new ServiceStackWrapperGenerator() in gen.Generate opts genOptions

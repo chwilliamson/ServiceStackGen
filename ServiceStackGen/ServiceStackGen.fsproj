@@ -42,6 +42,7 @@
   <ItemGroup>
     <Compile Include="Utils.fs" />
     <Compile Include="CommandOptions.fs" />
+    <Compile Include="GenerationOptions.fs" />
     <Compile Include="CodeModel.fs" />
     <Compile Include="TypeParser.fs" />
     <Compile Include="CodeGen.fs" />

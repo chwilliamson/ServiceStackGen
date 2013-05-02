@@ -6,6 +6,7 @@ open System.CodeDom
 
 open Utils
 open CommandOptions
+open GenerationOptions
 open CodeModel
 open TypeParser
 open CodeGen
@@ -43,32 +44,14 @@ let decorate (typeDecl: CodeTypeDeclaration) =
 let serviceFromOptions (serviceType: Type) (targetNamespace: string) =
     { MemberName = "_service"; TargetTypeName = targetNamespace; Type = serviceType; Methods = [] }
 
-let GenerateUnit (opts: Options) (serviceType: Type) =
+let GenerateUnit (opts: Options) (genOptions: GenerationOptions) =
     let compileUnit = new CodeCompileUnit()
 
     //add namespaces
     let ns = addNamespaces opts compileUnit
-    let service = serviceFromOptions serviceType opts.TargetNamespace
 
-    let serviceModel = parseService serviceType
+    let serviceModel = parseService genOptions
     let decorated = decorateSerialisation serviceModel
     genServiceTypes decorated |> Seq.iter (fun typeDecl -> ns.Types.Add(typeDecl) |> ignore)
-
-    //get service methods and generate request and response types
-    //let methods = opts.source.GetMethods(BindingFlags.Public ||| BindingFlags.Instance ||| BindingFlags.DeclaredOnly)
-    //TODO: Generate AnyMethod for each method on the service type
-//    let anyMethods = Array.map (fun mi -> ())
-//    methods |> Array.iter(fun m ->
-//        let requestInfo = { TypeName = m.Name; Parameters = m.GetParameters() }
-//        let responseInfo = { TypeName = m.Name + "Result"; ReturnType = if m.ReturnType = typeof<System.Void> then None else Some(m.ReturnType) }
-//        let rrInfo = { Request = requestInfo; Response = responseInfo }
-//        let requestTypeDecl = genRequestType rrInfo |> decorate
-//        let responseTypeDecl = genResponseType m |> decorate
-//        let anyMethod = genAnyMethod m requestTypeDecl responseTypeDecl
-//
-//        ns.Types.Add(requestTypeDecl) |> ignore
-//        ns.Types.Add(responseTypeDecl) |> ignore
-//        serviceTypeDecl.Members.Add(anyMethod) |> ignore
-//    )
 
     compileUnit

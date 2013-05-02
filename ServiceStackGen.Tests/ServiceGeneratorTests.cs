@@ -176,9 +176,10 @@ namespace ServiceStackGen.Tests
 
         private static Assembly GenerateAssembly<T>()
         {
-            var generationOptions = new ServiceStackGen.CommandOptions.Options("sdfs", "ServiceStackGen.Tests.Examples", @"c:\temp", Assembly.GetExecutingAssembly());
+            var commandOptions = new ServiceStackGen.CommandOptions.Options("sdfs", "ServiceStackGen.Tests.Examples", @"c:\temp", Assembly.GetExecutingAssembly());
             var ssGen = new ServiceStackWrapperGenerator();
-            return ssGen.GenerateAssembly(generationOptions, typeof(T));
+            var genOptions = new ServiceStackGen.GenerationOptions.GenerationOptions(typeof(T), GetOutputTypeName<T>());
+            return ssGen.GenerateAssembly(commandOptions, genOptions);
         }
 
         private static void AssertHasAttribute<TAttribute>(MemberInfo member) where TAttribute : Attribute
@@ -195,11 +196,16 @@ namespace ServiceStackGen.Tests
 
         public Type GetServiceWrapperType<T>(Type[] types)
         {
-            string wrapperTypeName = typeof(T).Name + "Expected";
+            string wrapperTypeName = GetOutputTypeName<T>();
             return types.Single(t => t.Name == wrapperTypeName);
         }
 
-        public Generate.RequestResponseType GetRequestResponseTypes<T>(Expression<Action<T>> invokeExpr, Type[] types)
+        private static string GetOutputTypeName<T>()
+        {
+            return typeof(T).Name + "Expected";
+        }
+
+        private Generate.RequestResponseType GetRequestResponseTypes<T>(Expression<Action<T>> invokeExpr, Type[] types)
         {
             MethodInfo method = ((MethodCallExpression)invokeExpr.Body).Method;
             string methodName = method.Name;

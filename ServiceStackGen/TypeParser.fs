@@ -1,7 +1,9 @@
 ﻿module ServiceStackGen.TypeParser
 open System
 open System.Reflection
+
 open CodeModel
+open GenerationOptions
 open Utils
 
 let private toRequestProperty (param : ParameterInfo) =
@@ -19,7 +21,7 @@ let parseDTOs (methodInfo : MethodInfo) =
 let toAnyMethod (mi : MethodInfo) =
     { Request = parseDTOs mi; ServiceMethodName = mi.Name; InvocationProperties = mi.GetParameters() |> Array.map (fun p -> pascalCase p.Name) }
 
-let parseService (serviceType : Type) =
+let parseService { ServiceType = serviceType; TargetTypeName = typeName } =
     let methods = serviceType.GetMethods(BindingFlags.Public ||| BindingFlags.Instance ||| BindingFlags.DeclaredOnly)
     let serviceAnyMethods = Array.map toAnyMethod methods |> List.ofArray
-    { MemberName = "_service"; Type = serviceType; TargetTypeName = serviceType.Name + "Expected"; Methods = serviceAnyMethods }
+    { MemberName = "_service"; Type = serviceType; TargetTypeName = typeName; Methods = serviceAnyMethods }
